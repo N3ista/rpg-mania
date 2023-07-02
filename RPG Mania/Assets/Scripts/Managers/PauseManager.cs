@@ -3,10 +3,10 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class PauseManager : MonoBehaviour {
-    public KeyCode pauseKey = KeyCode.Escape;
-    public Button resumeButton, quitButton;
-    public GameObject pauseUI;
-    private string mainMenuScene = "Main Menu";
+    [SerializeField] private KeyCode pauseKey = KeyCode.Escape;
+    [SerializeField] private GameObject pauseUI;
+    [SerializeField] private Button resumeButton, quitButton;
+    private int mainMenuSceneIndex = 0;
 
     private void Start() {
     
@@ -38,6 +38,6 @@ public class PauseManager : MonoBehaviour {
 
     private void Quit() {
         Time.timeScale = 1f;
-        SceneManager.LoadScene(mainMenuScene);
+        SceneManager.LoadScene(mainMenuSceneIndex);
     }
 }
