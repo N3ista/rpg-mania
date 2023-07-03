@@ -6,7 +6,7 @@ public class TitleManager : MonoBehaviour {
     [SerializeField] private Button startButton, quitButton;
     private int nextScene = 1;
 
-    private void Start() {
+    private void Awake() {
         startButton.onClick.AddListener(StartGame);
         quitButton.onClick.AddListener(QuitGame);
     }

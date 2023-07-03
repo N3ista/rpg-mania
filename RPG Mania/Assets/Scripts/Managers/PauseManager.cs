@@ -17,12 +17,12 @@ public class PauseManager : MonoBehaviour {
         actions.Gameplay.Enable();
 
         actions.Gameplay.Pause.performed += TogglePause;
-    }
 
-    private void Start() {
-    
         resumeButton.onClick.AddListener(Resume);
         quitButton.onClick.AddListener(Quit);
+    }
+
+    private void OnEnable() {
 
         Resume();
     }
@@ -35,17 +35,17 @@ public class PauseManager : MonoBehaviour {
     }
 
     private void Resume() {
-        Time.timeScale = 1f; 
+        Time.timeScale = 1; 
         pauseUI.SetActive(false);
     }
 
     private void Pause() {
-        Time.timeScale = 0f; 
+        Time.timeScale = 0; 
         pauseUI.SetActive(true);
     }
 
     private void Quit() {
-        Time.timeScale = 1f;
+        Time.timeScale = 1;
         actions.Gameplay.Disable();
         SceneManager.LoadScene(mainMenuSceneIndex);
     }
