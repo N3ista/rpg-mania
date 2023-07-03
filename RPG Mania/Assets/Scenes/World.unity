@@ -136,6 +136,7 @@ GameObject:
   - component: {fileID: 115102727}
   - component: {fileID: 115102726}
   - component: {fileID: 115102730}
+  - component: {fileID: 115102731}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -241,6 +242,19 @@ MonoBehaviour:
   pauseUI: {fileID: 1745376587}
   resumeButton: {fileID: 1216524700}
   quitButton: {fileID: 763922812}
+--- !u!114 &115102731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 115102725}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9902c5b49ba3f44e850b8653332ed7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  battleButton: {fileID: 1613210791}
 --- !u!1 &127361124
 GameObject:
   m_ObjectHideFlags: 0
