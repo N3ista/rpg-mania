@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour {
-
+    public static GameManager instance;
     public CharacterInfo player;
     public List<CharacterInfo> enemies = new List<CharacterInfo>();
 
@@ -15,7 +15,21 @@ public class GameManager : MonoBehaviour {
     {
         enemies.Add(enemy.GetComponent<CharacterInfo>());
     }
+
+    public void RemoveEnemy(GameObject enemy)
+    {
+        enemies.Remove(enemy.GetComponent<CharacterInfo>());
+    }
+
     private void Awake() {
-        DontDestroyOnLoad(gameObject);
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 }
