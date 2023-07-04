@@ -15,13 +15,13 @@ public class WorldManager : MonoBehaviour {
         gameManager = gameController.GetComponent<GameManager>();
 
         player = GameObject.FindGameObjectWithTag("Player");
-        gameManager.player = player.GetComponent<CharacterInfo>();
+        gameManager.player = player.GetComponent<PlayerInfo>();
 
         battleButton.onClick.AddListener(StartBattle);
     }
 
     private void StartBattle() {
-        foreach (GameObject e in GameObject.FindGameObjectsWithTag("Enemy")) gameManager.enemies.Add(e.GetComponent<CharacterInfo>());
+        foreach (GameObject e in GameObject.FindGameObjectsWithTag("Enemy")) gameManager.enemies.Add(e.GetComponent<EnemyInfo>());
 
         SceneManager.LoadScene(battleScene);
     }

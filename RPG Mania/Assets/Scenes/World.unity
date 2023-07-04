@@ -1217,6 +1217,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7575102328849272183, guid: 40286b3be96a7ef44a43ee52d9f29bea,
+        type: 3}
+      propertyPath: characterName
+      value: Bill
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 40286b3be96a7ef44a43ee52d9f29bea, type: 3}
 --- !u!1 &1613210789
@@ -1348,6 +1353,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 601920955503390083, guid: 19c9f2a71fa419f4e964f78ed2b81ef1,
+        type: 3}
+      propertyPath: speed
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 601920955503390083, guid: 19c9f2a71fa419f4e964f78ed2b81ef1,
+        type: 3}
+      propertyPath: characterName
+      value: Steve
+      objectReference: {fileID: 0}
     - target: {fileID: 7703420849107855997, guid: 19c9f2a71fa419f4e964f78ed2b81ef1,
         type: 3}
       propertyPath: m_Name
@@ -1583,6 +1598,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7575102328849272183, guid: 40286b3be96a7ef44a43ee52d9f29bea,
+        type: 3}
+      propertyPath: characterName
+      value: John
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 40286b3be96a7ef44a43ee52d9f29bea, type: 3}

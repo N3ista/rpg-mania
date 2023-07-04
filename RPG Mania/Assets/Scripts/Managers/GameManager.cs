@@ -3,22 +3,22 @@ using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour {
     public static GameManager instance;
-    public CharacterInfo player;
-    public List<CharacterInfo> enemies = new List<CharacterInfo>();
+    public PlayerInfo player;
+    public List<EnemyInfo> enemies = new List<EnemyInfo>();
 
     public void SetPlayer(GameObject player)
     {
-        this.player = player.GetComponent<CharacterInfo>();
+        this.player = player.GetComponent<PlayerInfo>();
     }
 
     public void AddEnemy(GameObject enemy)
     {
-        enemies.Add(enemy.GetComponent<CharacterInfo>());
+        enemies.Add(enemy.GetComponent<EnemyInfo>());
     }
 
     public void RemoveEnemy(GameObject enemy)
     {
-        enemies.Remove(enemy.GetComponent<CharacterInfo>());
+        enemies.Remove(enemy.GetComponent<EnemyInfo>());
     }
 
     private void Awake() {

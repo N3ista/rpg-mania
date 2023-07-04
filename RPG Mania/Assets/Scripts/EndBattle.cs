@@ -4,14 +4,13 @@ using UnityEngine.SceneManagement;
 
 public class EndBattle : MonoBehaviour {
     [SerializeField] private Button returnButton;
-    private int worldScene = 1;
-
+    [SerializeField] private BattleManager battleManager;
     private void Awake() {
         returnButton.onClick.AddListener(Return);
     }
 
     private void Return(){
-        SceneManager.LoadScene(worldScene);
+        battleManager.EndBattle();
     }
 
 }
