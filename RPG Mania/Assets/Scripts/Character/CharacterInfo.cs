@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 public class CharacterInfo : MonoBehaviour {
     public string characterName = "";
-    public int maxHealth = 10;
+    public int maxHealth;
     public int health;
-    public int attack = 10;
-    public int defense = 5;
-    public int speed = 10;
+    public int attack;
+    public int defense;
+    public int speed;
 
     public List<CharacterAction> actions = new List<CharacterAction>();
 
@@ -31,5 +31,8 @@ public class CharacterInfo : MonoBehaviour {
         if (damage < 0) damage = 0;
 
         target.health -= damage;
+        if (target.health < 0) target.health = 0;
+
+        Debug.Log(damage);
     }
 }

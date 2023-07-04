@@ -12,6 +12,7 @@ public class BattleManager : MonoBehaviour {
     [SerializeField] private Button actionButton, targetButton;
     private GameManager gameManager;
     private int worldScene = 1;
+    public int killCount = 0;
 
     private Queue<CharacterInfo> turnOrder = new Queue<CharacterInfo>();
     private bool awaitCommand = false;
@@ -25,10 +26,6 @@ public class BattleManager : MonoBehaviour {
         gameManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManager>();
     }
     private void Start() {
-        Debug.Log("Start of scene. Number of enemies: " + gameManager.enemies.Count);
-        Debug.Log("eHealthContainer child count: " + eHealthContainer.transform.childCount);
-        Debug.Log("actionContainer child count: " + actionContainer.transform.childCount);
-        Debug.Log("targetContainer child count: " + targetContainer.transform.childCount);
 
         var characters = new List<CharacterInfo> { gameManager.player }.Concat(gameManager.enemies);
         var sortedCharacters = characters.OrderByDescending(c => c.speed);
@@ -118,15 +115,36 @@ public class BattleManager : MonoBehaviour {
 
                     targetContainer.SetActive(false);
 
+                    Debug.Log($"{activeCharacter.characterName} used {action.Name} at {target.characterName}"); // Display the action's name
+                    action.Action(target);
+
+                    if (target.health <= 0)
+                    {
+                        killCount++;
+
+                        if (killCount >= gameManager.enemies.Count) EndBattle();
+
+                        int targetIndex = gameManager.enemies.IndexOf(target as EnemyInfo);
+                        
+                        targetContainer.transform.GetChild(targetIndex).GetComponent<Button>().enabled = false;
+                        
+                    }
+
+                } else {
+                    action = activeCharacter.actions[0];
+
+                    Debug.Log($"{activeCharacter.characterName} used {action.Name} at {gameManager.player.characterName}"); // Display the action's name
+                    action.Action(gameManager.player);
+
+                    if (gameManager.player.health <= 0) EndBattle();
                 }
 
-                Debug.Log($"Executing action: {action.Name}"); // Display the action's name
-                action.Action(target);
+                
 
                 UpdateHealth();
 
-                // turnOrder.Dequeue();
-                // turnOrder.Enqueue(activeCharacter);
+                turnOrder.Dequeue();
+                turnOrder.Enqueue(activeCharacter);
 
             }
             
@@ -137,22 +155,12 @@ public class BattleManager : MonoBehaviour {
 
     public void EndBattle()
     {
-        Debug.Log("Ending");
+        Debug.Log("End Battle");
 
         StopCoroutine(battle);
-
-        ClearContainer(eHealthContainer);
-        ClearContainer(actionContainer);
-        ClearContainer(targetContainer);
 
         gameManager.enemies.Clear();
 
         SceneManager.LoadScene(worldScene);
     }
-
-    private void ClearContainer(GameObject container) {
-        foreach (Transform child in container.transform) {
-            Destroy(child.gameObject);
-        }
-}
 }
