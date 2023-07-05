@@ -44,7 +44,7 @@ public class BattleManager : MonoBehaviour {
             selectEnemy.onClick.AddListener(() => PickTarget(enemy));
         }
 
-        for (int i = 0; i < gameManager.player.actions.Count; i++)
+        for (int i = 0; i < gameManager.player.CountActions(); i++)
         {
             CharacterAction currentAction = gameManager.player.GetAction(i);
 
@@ -77,11 +77,11 @@ public class BattleManager : MonoBehaviour {
 
     private void UpdateHealth()
     {
-        pHealth.text = "Player Health: " + gameManager.player.health;
+        pHealth.text = gameManager.player.characterName + "'s Health: " + gameManager.player.health;
 
         for (int i = 0; i < gameManager.enemies.Count; i++)
         {
-            eHealthContainer.transform.GetChild(i).GetComponent<TextMeshProUGUI>().text = "Enemy Health: " + gameManager.enemies[i].health;
+            eHealthContainer.transform.GetChild(i).GetComponent<TextMeshProUGUI>().text = gameManager.enemies[i].characterName + "'s Health: " + gameManager.enemies[i].health;
         }
     }
 
@@ -132,7 +132,7 @@ public class BattleManager : MonoBehaviour {
                     }
 
                 } else {
-                    action = activeCharacter.actions[0];
+                    action = activeCharacter.GetAction(0);
 
                     Debug.Log($"{activeCharacter.characterName} used {action.Name} at {gameManager.player.characterName}"); // Display the action's name
                     activeCharacter.DoAction(action, gameManager.player);
