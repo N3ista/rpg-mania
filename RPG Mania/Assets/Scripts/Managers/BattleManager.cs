@@ -127,6 +127,9 @@ public class BattleManager : MonoBehaviour {
                         int targetIndex = gameManager.enemies.IndexOf(target as EnemyInfo);
                         
                         targetContainer.transform.GetChild(targetIndex).GetComponent<Button>().enabled = false;
+
+                        var newTurnOrder = new Queue<CharacterInfo>(turnOrder.Where(x => x != target));
+                        turnOrder = newTurnOrder;
                         
                     }
 
