@@ -20,8 +20,6 @@ public class BattleManager : MonoBehaviour {
     private CharacterAction action;
     private CharacterInfo target;
 
-    private Coroutine battle;
-
     private void Awake() {
         gameManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManager>();
     }
@@ -62,7 +60,7 @@ public class BattleManager : MonoBehaviour {
 
         UpdateHealth();
 
-        battle = StartCoroutine(BattleSequence());
+        StartCoroutine(BattleSequence());
     }
 
     private void PickTarget(CharacterInfo target)
@@ -116,7 +114,7 @@ public class BattleManager : MonoBehaviour {
                     targetContainer.SetActive(false);
 
                     Debug.Log($"{activeCharacter.characterName} used {action.Name} at {target.characterName}"); // Display the action's name
-                    action.Action(target);
+                    activeCharacter.DoAction(action, target);
 
                     if (target.health <= 0)
                     {
@@ -137,7 +135,7 @@ public class BattleManager : MonoBehaviour {
                     action = activeCharacter.actions[0];
 
                     Debug.Log($"{activeCharacter.characterName} used {action.Name} at {gameManager.player.characterName}"); // Display the action's name
-                    action.Action(gameManager.player);
+                    activeCharacter.DoAction(action, gameManager.player);
 
                     if (gameManager.player.health <= 0) EndBattle();
                 }
@@ -148,6 +146,8 @@ public class BattleManager : MonoBehaviour {
 
                 turnOrder.Dequeue();
                 turnOrder.Enqueue(activeCharacter);
+
+                yield return new WaitForSeconds(1);
 
             }
             
@@ -160,7 +160,7 @@ public class BattleManager : MonoBehaviour {
     {
         Debug.Log("End Battle");
 
-        StopCoroutine(battle);
+        StopAllCoroutines();
 
         gameManager.enemies.Clear();
 
