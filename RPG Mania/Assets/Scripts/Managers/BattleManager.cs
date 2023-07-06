@@ -58,6 +58,7 @@ public class BattleManager : MonoBehaviour {
         targetContainer.SetActive(false);
         actionContainer.SetActive(false);
 
+        UpdateActions();
         UpdateHealth();
 
         StartCoroutine(BattleSequence());
@@ -82,6 +83,17 @@ public class BattleManager : MonoBehaviour {
         for (int i = 0; i < gameManager.enemies.Count; i++)
         {
             eHealthContainer.transform.GetChild(i).GetComponent<TextMeshProUGUI>().text = gameManager.enemies[i].characterName + "'s Health: " + gameManager.enemies[i].health;
+        }
+    }
+
+    private void UpdateActions()
+    {
+        PlayerInfo p = gameManager.player;
+        Button[] buttonList = actionContainer.transform.GetComponentsInChildren<Button>();
+
+        for (int i = 0; i < buttonList.Length; i++) 
+        {
+            buttonList[i].interactable = p.GetAction(i).MpUse <= p.mp;
         }
     }
 
@@ -124,7 +136,7 @@ public class BattleManager : MonoBehaviour {
 
                         int targetIndex = gameManager.enemies.IndexOf(target as EnemyInfo);
                         
-                        targetContainer.transform.GetChild(targetIndex).GetComponent<Button>().enabled = false;
+                        targetContainer.transform.GetChild(targetIndex).GetComponent<Button>().interactable = false;
 
                         var newTurnOrder = new Queue<CharacterInfo>(turnOrder.Where(x => x != target));
                         turnOrder = newTurnOrder;

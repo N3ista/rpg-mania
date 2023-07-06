@@ -38,8 +38,8 @@ public class CharacterInfo : MonoBehaviour {
 
     public void DoAction(CharacterAction action, CharacterInfo target)
     {
-        action.Action(this, target);
+        if (action.MpUse <= mp) action.Action(this, target);
+
         mp -= action.MpUse;
-        if (mp < 0) mp = 0;
     }
 }
