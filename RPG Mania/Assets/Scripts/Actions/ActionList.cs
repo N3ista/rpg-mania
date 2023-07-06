@@ -45,7 +45,7 @@ public class ActionList
     {
         if (Random.Range(0,9) <= 3) {Debug.Log("Miss"); return;}
 
-        int damage = self.attack * 2 - target.defense;
+        int damage = (int)(self.attack * 1.5) - target.defense;
 
         if (damage < 0) damage = 0;
 

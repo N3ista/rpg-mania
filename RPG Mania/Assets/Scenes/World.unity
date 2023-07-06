@@ -1375,6 +1375,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 601920955503390083, guid: 19c9f2a71fa419f4e964f78ed2b81ef1,
         type: 3}
+      propertyPath: maxHealth
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 601920955503390083, guid: 19c9f2a71fa419f4e964f78ed2b81ef1,
+        type: 3}
       propertyPath: characterName
       value: Steve
       objectReference: {fileID: 0}
