@@ -3,13 +3,15 @@ public class CharacterAction
     public delegate void ActionDelegate(CharacterInfo self, CharacterInfo target);
 
     public string Name { get; private set; }
-    public int MpUse { get; private set; }
+    public int Cost { get; private set; }
+    public bool Special { get; private set; }
     public ActionDelegate Action { get; private set; }
 
-    public CharacterAction(string name, int mpUse, ActionDelegate action)
+    public CharacterAction(string name, int cost, bool special, ActionDelegate action)
     {
         Name = name;
-        MpUse = mpUse;
+        Cost = cost;
+        Special = special;
         Action = action;
     }
 }

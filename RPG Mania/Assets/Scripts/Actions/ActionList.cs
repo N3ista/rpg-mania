@@ -4,7 +4,7 @@ using UnityEngine;
 public class ActionList
 {
     public static ActionList Instance { get; private set; }
-    public IDictionary<string, CharacterAction> actionList;
+    private IDictionary<string, CharacterAction> actionList;
 
     private ActionList()
     {
@@ -21,13 +21,25 @@ public class ActionList
         return Instance;
     }
 
+    public CharacterAction GetAction(string key)
+    {
+        if (actionList.ContainsKey(key)) return actionList[key];
+
+        else return new CharacterAction("Null", 0, false, EmptyAction);
+    }
+
     private void FillDictionary()
     {
         actionList = new Dictionary<string, CharacterAction>()
         {
-            {"Base Attack", new CharacterAction("Base Attack", 0, BaseAttack)},
-            {"Heavy Attack", new CharacterAction("Heavy Attack", 0, HeavyAttack)},
+            {"base", new CharacterAction("Base Attack", 1, false, BaseAttack)},
+            {"heavy", new CharacterAction("Heavy Attack", 2, false, HeavyAttack)},
         };
+    }
+
+    public void EmptyAction(CharacterInfo self, CharacterInfo target)
+    {
+        Debug.Log("This action is null");
     }
 
     public void BaseAttack(CharacterInfo self, CharacterInfo target)
@@ -43,8 +55,6 @@ public class ActionList
 
     public void HeavyAttack(CharacterInfo self, CharacterInfo target)
     {
-        if (Random.Range(0,9) <= 3) {Debug.Log("Miss"); return;}
-
         int damage = (int)(self.attack * 1.5) - target.defense;
 
         if (damage < 0) damage = 0;

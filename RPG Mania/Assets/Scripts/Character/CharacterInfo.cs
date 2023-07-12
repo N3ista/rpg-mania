@@ -5,22 +5,23 @@ public class CharacterInfo : MonoBehaviour {
     public string characterName = "";
     public int maxHealth;
     public int health;
-    public int mp;
+    public int combo;
+    public int stamina;
     public int attack;
     public int defense;
     public int speed;
-    protected List<string> actionNames = new List<string>();
+    protected List<string> actionKeys = new List<string>();
 
     protected List<CharacterAction> actions = new List<CharacterAction>();
 
     public void Start() {
         health = maxHealth;
 
-        actionNames.Add("Base Attack");
-        actionNames.Add("Heavy Attack");
+        actionKeys.Add("base");
+        actionKeys.Add("heavy");
 
-        actions.Add(ActionList.GetInstance().actionList[actionNames[0]]);
-        actions.Add(ActionList.GetInstance().actionList[actionNames[1]]);
+        actions.Add(ActionList.GetInstance().GetAction(actionKeys[0]));
+        actions.Add(ActionList.GetInstance().GetAction(actionKeys[1]));
     }
 
     public CharacterAction GetAction(int i)
@@ -38,8 +39,19 @@ public class CharacterInfo : MonoBehaviour {
 
     public void DoAction(CharacterAction action, CharacterInfo target)
     {
-        if (action.MpUse <= mp) action.Action(this, target);
+        if (action.Cost <= combo && !action.Special)
+        {
+            action.Action(this, target);
+        }
+    }
 
-        mp -= action.MpUse;
+    public void DoSpecialAction(CharacterAction action, CharacterInfo target)
+    {
+        if (action.Cost <= stamina && action.Special) 
+        {
+            action.Action(this, target);
+
+            stamina -= action.Cost;
+        }
     }
 }

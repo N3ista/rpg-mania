@@ -16,16 +16,18 @@ public class BattleManager : MonoBehaviour {
 
     private Queue<CharacterInfo> turnOrder = new Queue<CharacterInfo>();
     private bool awaitCommand = false;
+    private int comboLength = 0;
 
-    private CharacterAction action;
+    private List<CharacterAction> actions = new List<CharacterAction>();
     private CharacterInfo target;
+    private PlayerInfo player;
 
     private void Awake() {
         gameManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManager>();
     }
     private void Start() {
-
-        var characters = new List<CharacterInfo> { gameManager.player }.Concat(gameManager.enemies);
+        player = gameManager.player;
+        var characters = new List<CharacterInfo> { player }.Concat(gameManager.enemies);
         var sortedCharacters = characters.OrderByDescending(c => c.speed);
         turnOrder = new Queue<CharacterInfo>(sortedCharacters);
 
@@ -44,9 +46,9 @@ public class BattleManager : MonoBehaviour {
             selectEnemy.onClick.AddListener(() => PickTarget(enemy));
         }
 
-        for (int i = 0; i < gameManager.player.CountActions(); i++)
+        for (int i = 0; i < player.CountActions(); i++)
         {
-            CharacterAction currentAction = gameManager.player.GetAction(i);
+            CharacterAction currentAction = player.GetAction(i);
 
             Button selectAction = Instantiate(actionButton, actionContainer.transform);
 
@@ -72,13 +74,20 @@ public class BattleManager : MonoBehaviour {
 
     private void PickAction(CharacterAction action)
     {
-        this.action = action;
-        awaitCommand = false;
+        if (action.Cost <= player.combo - comboLength) 
+        {
+            actions.Add(action);
+            comboLength += action.Cost;
+        }
+
+        if (comboLength < player.combo) UpdateActions();
+
+        else awaitCommand = false;
     }
 
     private void UpdateHealth()
     {
-        pHealth.text = gameManager.player.characterName + "'s Health: " + gameManager.player.health;
+        pHealth.text = player.characterName + "'s Health: " + player.health;
 
         for (int i = 0; i < gameManager.enemies.Count; i++)
         {
@@ -88,12 +97,11 @@ public class BattleManager : MonoBehaviour {
 
     private void UpdateActions()
     {
-        PlayerInfo p = gameManager.player;
         Button[] buttonList = actionContainer.transform.GetComponentsInChildren<Button>();
 
         for (int i = 0; i < buttonList.Length; i++) 
         {
-            buttonList[i].interactable = p.GetAction(i).MpUse <= p.mp;
+            buttonList[i].interactable = player.GetAction(i).Cost <= player.combo - comboLength;
         }
     }
 
@@ -102,14 +110,13 @@ public class BattleManager : MonoBehaviour {
         while (true){
             if (turnOrder.Count > 0)
             {
-                var activeCharacter = turnOrder.Peek();
+                CharacterInfo activeCharacter = turnOrder.Peek();
 
-                if (activeCharacter == gameManager.player){
+                if (activeCharacter == player){
                     awaitCommand = true;
                     actionContainer.SetActive(true);
                     while (awaitCommand)
                     {
-
                         
                         yield return null;
                     }
@@ -125,8 +132,13 @@ public class BattleManager : MonoBehaviour {
 
                     targetContainer.SetActive(false);
 
-                    Debug.Log($"{activeCharacter.characterName} used {action.Name} at {target.characterName}"); // Display the action's name
-                    activeCharacter.DoAction(action, target);
+                    foreach (CharacterAction a in actions)
+                    {
+                        Debug.Log($"{activeCharacter.characterName} used {a.Name} at {target.characterName}");
+                        activeCharacter.DoAction(a, target);
+                    }
+
+                    
 
                     if (target.health <= 0)
                     {
@@ -144,20 +156,15 @@ public class BattleManager : MonoBehaviour {
                     }
 
                 } else {
-                    action = activeCharacter.GetAction(0);
+                    actions.Add(activeCharacter.GetAction(0));
 
-                    Debug.Log($"{activeCharacter.characterName} used {action.Name} at {gameManager.player.characterName}"); // Display the action's name
-                    activeCharacter.DoAction(action, gameManager.player);
+                    Debug.Log($"{activeCharacter.characterName} used {actions[0].Name} at {player.characterName}"); // Display the action's name
+                    activeCharacter.DoAction(actions[0], player);
 
-                    if (gameManager.player.health <= 0) EndBattle();
+                    if (player.health <= 0) EndBattle();
                 }
 
-                
-
-                UpdateHealth();
-
-                turnOrder.Dequeue();
-                turnOrder.Enqueue(activeCharacter);
+                NextTurn(activeCharacter);
 
                 yield return new WaitForSeconds(1);
 
@@ -166,6 +173,18 @@ public class BattleManager : MonoBehaviour {
             
         }
         
+    }
+
+    private void NextTurn(CharacterInfo activeCharacter)
+    {
+        UpdateHealth();
+        UpdateActions();
+
+        turnOrder.Dequeue();
+        turnOrder.Enqueue(activeCharacter);
+
+        actions.Clear();
+        comboLength = 0;
     }
 
     public void EndBattle()
