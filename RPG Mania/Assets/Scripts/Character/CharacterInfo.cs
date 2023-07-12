@@ -11,10 +11,12 @@ public class CharacterInfo : MonoBehaviour {
     public int defense;
     public int speed;
     protected List<string> actionKeys = new List<string>();
+    protected List<string> specialKeys = new List<string>();
 
     protected List<CharacterAction> actions = new List<CharacterAction>();
+    protected List<CharacterAction> specialActions = new List<CharacterAction>();
 
-    public void Start() {
+    protected virtual void Start() {
         health = maxHealth;
 
         actionKeys.Add("base");
@@ -29,7 +31,13 @@ public class CharacterInfo : MonoBehaviour {
         if (i < actions.Count) return actions[i];
 
         else return actions[0];
+    }
 
+    public CharacterAction GetSpecialAction(int i)
+    {
+        if (i < specialActions.Count) return specialActions[i];
+
+        else return actions[0];
     }
 
     public int CountActions()
@@ -37,17 +45,19 @@ public class CharacterInfo : MonoBehaviour {
         return actions.Count;
     }
 
+    public int CountSpecialAction()
+    {
+        return specialActions.Count;
+    }
+
     public void DoAction(CharacterAction action, CharacterInfo target)
     {
-        if (action.Cost <= combo && !action.Special)
-        {
-            action.Action(this, target);
-        }
+        action.Action(this, target);
     }
 
     public void DoSpecialAction(CharacterAction action, CharacterInfo target)
     {
-        if (action.Cost <= stamina && action.Special) 
+        if (action.Cost <= stamina) 
         {
             action.Action(this, target);
 

@@ -1,9 +1,11 @@
 using UnityEngine;
 
 public class PlayerInfo : CharacterInfo {
-    private new void Start() {
+    protected override void Start() {
         base.Start();
 
+        specialKeys.Add("health drain");
 
+        specialActions.Add(ActionList.GetInstance().GetSpecialAction(specialKeys[0]));
     }
 }

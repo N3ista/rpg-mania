@@ -7,9 +7,12 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 
 public class BattleManager : MonoBehaviour {
-    [SerializeField] private TextMeshProUGUI pHealth, eHealth;
-    [SerializeField] private GameObject eHealthContainer, actionContainer, targetContainer;
-    [SerializeField] private Button actionButton, targetButton;
+    [SerializeField] private TextMeshProUGUI pHealth, pStamina, eHealth;
+    [SerializeField] private GameObject eHealthContainer, actionContainer, specialContainer, targetContainer;
+    [SerializeField] private Button actionButton, specialButton, targetButton;
+    private List<Button> targetButtons = new List<Button>();
+    private List<Button> actionButtons = new List<Button>();
+    private List<Button> specialButtons = new List<Button>();
     private GameManager gameManager;
     private int worldScene = 1;
     public int killCount = 0;
@@ -19,6 +22,7 @@ public class BattleManager : MonoBehaviour {
     private int comboLength = 0;
 
     private List<CharacterAction> actions = new List<CharacterAction>();
+    private CharacterAction specialAction;
     private CharacterInfo target;
     private PlayerInfo player;
 
@@ -30,6 +34,8 @@ public class BattleManager : MonoBehaviour {
         var characters = new List<CharacterInfo> { player }.Concat(gameManager.enemies);
         var sortedCharacters = characters.OrderByDescending(c => c.speed);
         turnOrder = new Queue<CharacterInfo>(sortedCharacters);
+
+
 
         for (int i = 0; i < gameManager.enemies.Count; i++)
         {
@@ -44,6 +50,8 @@ public class BattleManager : MonoBehaviour {
             selectEnemy.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = enemy.characterName;
 
             selectEnemy.onClick.AddListener(() => PickTarget(enemy));
+
+            targetButtons.Add(selectEnemy);
         }
 
         for (int i = 0; i < player.CountActions(); i++)
@@ -55,12 +63,28 @@ public class BattleManager : MonoBehaviour {
             selectAction.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = currentAction.Name;
 
             selectAction.onClick.AddListener(() => PickAction(currentAction));
+
+            actionButtons.Add(selectAction);
+        }
+        for (int i = 0; i < player.CountSpecialAction(); i++)
+        {
+            CharacterAction currentAction = player.GetSpecialAction(i);
+
+            Button selectSpecial = Instantiate(specialButton, specialContainer.transform);
+
+            selectSpecial.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = currentAction.Name;
+
+            selectSpecial.onClick.AddListener(() => PickSpecial(currentAction));
+
+            specialButtons.Add(selectSpecial);
         }
 
         targetContainer.SetActive(false);
+        specialContainer.SetActive(false);
         actionContainer.SetActive(false);
 
         UpdateActions();
+        UpdateSpecials();
         UpdateHealth();
 
         StartCoroutine(BattleSequence());
@@ -85,9 +109,17 @@ public class BattleManager : MonoBehaviour {
         else awaitCommand = false;
     }
 
+    private void PickSpecial(CharacterAction action)
+    {
+        if (action.Cost <= player.stamina) specialAction = action;
+
+        awaitCommand = false;
+    }
+
     private void UpdateHealth()
     {
         pHealth.text = player.characterName + "'s Health: " + player.health;
+        pStamina.text = player.characterName + "'s Stamina: " + player.stamina;
 
         for (int i = 0; i < gameManager.enemies.Count; i++)
         {
@@ -97,11 +129,17 @@ public class BattleManager : MonoBehaviour {
 
     private void UpdateActions()
     {
-        Button[] buttonList = actionContainer.transform.GetComponentsInChildren<Button>();
-
-        for (int i = 0; i < buttonList.Length; i++) 
+        for (int i = 0; i < actionButtons.Count; i++) 
         {
-            buttonList[i].interactable = player.GetAction(i).Cost <= player.combo - comboLength;
+            actionButtons[i].interactable = player.GetAction(i).Cost <= player.combo - comboLength;
+        }
+    }
+
+    private void UpdateSpecials()
+    {
+        for (int i = 0; i < specialButtons.Count; i++)
+        {
+            specialButtons[i].interactable = player.GetAction(i).Cost <= player.stamina;
         }
     }
 
@@ -120,8 +158,22 @@ public class BattleManager : MonoBehaviour {
                         
                         yield return null;
                     }
-                    awaitCommand = true;
+                    
                     actionContainer.SetActive(false);
+                    
+                    if (player.stamina > 0)
+                    {
+                        awaitCommand = true;
+                        specialContainer.SetActive(true);
+                    }
+
+                    while (awaitCommand)
+                    {
+
+                        yield return null;
+                    }
+                    awaitCommand = true;
+                    specialContainer.SetActive(false);
                     targetContainer.SetActive(true);
                     while (awaitCommand)
                     {
@@ -138,7 +190,8 @@ public class BattleManager : MonoBehaviour {
                         activeCharacter.DoAction(a, target);
                     }
 
-                    
+                    Debug.Log($"{activeCharacter.characterName} used {specialAction.Name} at {target.characterName}");
+                    activeCharacter.DoSpecialAction(specialAction, target);
 
                     if (target.health <= 0)
                     {
@@ -178,6 +231,7 @@ public class BattleManager : MonoBehaviour {
     private void NextTurn(CharacterInfo activeCharacter)
     {
         UpdateHealth();
+        UpdateSpecials();
         UpdateActions();
 
         turnOrder.Dequeue();

@@ -4,14 +4,12 @@ public class CharacterAction
 
     public string Name { get; private set; }
     public int Cost { get; private set; }
-    public bool Special { get; private set; }
     public ActionDelegate Action { get; private set; }
 
-    public CharacterAction(string name, int cost, bool special, ActionDelegate action)
+    public CharacterAction(string name, int cost, ActionDelegate action)
     {
         Name = name;
         Cost = cost;
-        Special = special;
         Action = action;
     }
 }
