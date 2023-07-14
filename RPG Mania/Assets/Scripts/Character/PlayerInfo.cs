@@ -4,8 +4,8 @@ public class PlayerInfo : CharacterInfo {
     protected override void Start() {
         base.Start();
 
-        specialKeys.Add("health drain");
+        skillKeys.Add("health drain");
 
-        specialActions.Add(ActionList.GetInstance().GetSpecialAction(specialKeys[0]));
+        skillActions.Add(SkillList.GetInstance().GetAction(skillKeys[0]));
     }
 }

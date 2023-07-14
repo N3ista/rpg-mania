@@ -10,58 +10,53 @@ public class CharacterInfo : MonoBehaviour {
     public int attack;
     public int defense;
     public int speed;
-    protected List<string> actionKeys = new List<string>();
-    protected List<string> specialKeys = new List<string>();
+    public SkillAction activeSkill;
+    protected List<string> comboKeys = new List<string>();
+    protected List<string> skillKeys = new List<string>();
 
-    protected List<CharacterAction> actions = new List<CharacterAction>();
-    protected List<CharacterAction> specialActions = new List<CharacterAction>();
+    protected List<ComboAction> comboActions = new List<ComboAction>();
+    protected List<SkillAction> skillActions = new List<SkillAction>();
 
     protected virtual void Start() {
         health = maxHealth;
 
-        actionKeys.Add("base");
-        actionKeys.Add("heavy");
+        comboKeys.Add("base");
+        comboKeys.Add("heavy");
 
-        actions.Add(ActionList.GetInstance().GetAction(actionKeys[0]));
-        actions.Add(ActionList.GetInstance().GetAction(actionKeys[1]));
+        comboActions.Add(ComboList.GetInstance().GetAction(comboKeys[0]));
+        comboActions.Add(ComboList.GetInstance().GetAction(comboKeys[1]));
     }
 
-    public CharacterAction GetAction(int i)
+    public ComboAction GetAction(int i)
     {
-        if (i < actions.Count) return actions[i];
+        if (i < comboActions.Count) return comboActions[i];
 
-        else return actions[0];
+        else return comboActions[0];
     }
-
-    public CharacterAction GetSpecialAction(int i)
+    public SkillAction GetSkill(int i)
     {
-        if (i < specialActions.Count) return specialActions[i];
+        if (i < skillActions.Count) return skillActions[i];
 
-        else return actions[0];
+        else return skillActions[0];
     }
 
     public int CountActions()
     {
-        return actions.Count;
+        return comboActions.Count;
     }
-
-    public int CountSpecialAction()
+    public int CountSkills()
     {
-        return specialActions.Count;
+        return skillActions.Count;
     }
 
-    public void DoAction(CharacterAction action, CharacterInfo target)
+    public void DoAction(ComboAction action, CharacterInfo target)
     {
         action.Action(this, target);
     }
 
-    public void DoSpecialAction(CharacterAction action, CharacterInfo target)
+    public void UseSkill(SkillAction skill)
     {
-        if (action.Cost <= stamina) 
-        {
-            action.Action(this, target);
-
-            stamina -= action.Cost;
-        }
+        activeSkill = skill;
+        stamina -= skill.Cost;
     }
 }

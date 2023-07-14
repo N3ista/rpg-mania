@@ -7,12 +7,12 @@ using System.Collections;
 using UnityEngine.SceneManagement;
 
 public class BattleManager : MonoBehaviour {
-    [SerializeField] private TextMeshProUGUI pHealth, pStamina, eHealth;
-    [SerializeField] private GameObject eHealthContainer, actionContainer, specialContainer, targetContainer;
-    [SerializeField] private Button actionButton, specialButton, targetButton;
+    [SerializeField] private TextMeshProUGUI pHealth, pCombo, pStamina, eHealth;
+    [SerializeField] private GameObject eHealthContainer, actionContainer, skillContainer, targetContainer, pickAction;
+    [SerializeField] private Button actionButton, skillButton, targetButton, pickSkillButton, attackButton, escapeButton;
     private List<Button> targetButtons = new List<Button>();
     private List<Button> actionButtons = new List<Button>();
-    private List<Button> specialButtons = new List<Button>();
+    private List<Button> skillButtons = new List<Button>();
     private GameManager gameManager;
     private int worldScene = 1;
     public int killCount = 0;
@@ -21,8 +21,7 @@ public class BattleManager : MonoBehaviour {
     private bool awaitCommand = false;
     private int comboLength = 0;
 
-    private List<CharacterAction> actions = new List<CharacterAction>();
-    private CharacterAction specialAction;
+    private List<ComboAction> comboActions = new List<ComboAction>();
     private CharacterInfo target;
     private PlayerInfo player;
 
@@ -35,8 +34,77 @@ public class BattleManager : MonoBehaviour {
         var sortedCharacters = characters.OrderByDescending(c => c.speed);
         turnOrder = new Queue<CharacterInfo>(sortedCharacters);
 
+        pCombo.text = player.characterName + "'s Combo Length: " + player.combo;
 
+        attackButton.onClick.AddListener(SelectAttack);
+        pickSkillButton.onClick.AddListener(SelectSkill);
+        escapeButton.onClick.AddListener(Escape);
 
+        SetEnemies();
+        SetActions();
+        SetSkills();
+
+        targetContainer.SetActive(false);
+        skillContainer.SetActive(false);
+        actionContainer.SetActive(false);
+        pickAction.SetActive(false);
+
+        UpdateCombo();
+        UpdateSkills();
+        UpdateHealth();
+
+        StartCoroutine(BattleSequence());
+    }
+
+    private void SelectAttack()
+    {
+        pickAction.SetActive(false);
+        targetContainer.SetActive(true);
+    }
+
+    private void SelectSkill()
+    {
+        pickAction.SetActive(false);
+        skillContainer.SetActive(true);
+    }
+
+    private void Escape()
+    {
+        EndBattle();
+    }
+
+    private void PickTarget(CharacterInfo target)
+    {
+        this.target = target;
+        targetContainer.SetActive(false);
+        awaitCommand = false;
+    }
+
+    private void PickCombo(ComboAction action)
+    {
+        if (action.Cost <= player.combo - comboLength) 
+        {
+            comboActions.Add(action);
+            comboLength += action.Cost;
+        }
+
+        if (comboLength < player.combo) UpdateCombo();
+
+        else awaitCommand = false;
+    }
+
+    private void PickSkill(SkillAction skill)
+    {
+        if (skill.Cost <= player.stamina) player.UseSkill(skill);
+
+        skillContainer.SetActive(false);
+        pickAction.SetActive(true);
+        pickSkillButton.interactable = false;
+        pStamina.text = player.characterName + "'s Stamina: " + player.stamina;
+    }
+
+    private void SetEnemies()
+    {
         for (int i = 0; i < gameManager.enemies.Count; i++)
         {
             EnemyInfo enemy = gameManager.enemies[i];
@@ -53,73 +121,45 @@ public class BattleManager : MonoBehaviour {
 
             targetButtons.Add(selectEnemy);
         }
+    }
 
+    private void SetActions()
+    {
         for (int i = 0; i < player.CountActions(); i++)
         {
-            CharacterAction currentAction = player.GetAction(i);
+            ComboAction currentAction = player.GetAction(i);
 
             Button selectAction = Instantiate(actionButton, actionContainer.transform);
 
             selectAction.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = currentAction.Name;
 
-            selectAction.onClick.AddListener(() => PickAction(currentAction));
+            selectAction.onClick.AddListener(() => PickCombo(currentAction));
 
             actionButtons.Add(selectAction);
         }
-        for (int i = 0; i < player.CountSpecialAction(); i++)
+    }
+
+    private void SetSkills()
+    {
+        for (int i = 0; i < player.CountSkills(); i++)
         {
-            CharacterAction currentAction = player.GetSpecialAction(i);
+            SkillAction currentSkill = player.GetSkill(i);
 
-            Button selectSpecial = Instantiate(specialButton, specialContainer.transform);
+            Button selectSkill = Instantiate(skillButton, skillContainer.transform);
 
-            selectSpecial.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = currentAction.Name;
+            selectSkill.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = currentSkill.Name;
 
-            selectSpecial.onClick.AddListener(() => PickSpecial(currentAction));
+            selectSkill.onClick.AddListener(() => PickSkill(currentSkill));
 
-            specialButtons.Add(selectSpecial);
+            skillButtons.Add(selectSkill);
         }
 
-        targetContainer.SetActive(false);
-        specialContainer.SetActive(false);
-        actionContainer.SetActive(false);
-
-        UpdateActions();
-        UpdateSpecials();
-        UpdateHealth();
-
-        StartCoroutine(BattleSequence());
-    }
-
-    private void PickTarget(CharacterInfo target)
-    {
-        this.target = target;
-        awaitCommand = false;
-    }
-
-    private void PickAction(CharacterAction action)
-    {
-        if (action.Cost <= player.combo - comboLength) 
-        {
-            actions.Add(action);
-            comboLength += action.Cost;
-        }
-
-        if (comboLength < player.combo) UpdateActions();
-
-        else awaitCommand = false;
-    }
-
-    private void PickSpecial(CharacterAction action)
-    {
-        if (action.Cost <= player.stamina) specialAction = action;
-
-        awaitCommand = false;
+        pStamina.text = player.characterName + "'s Stamina: " + player.stamina;
     }
 
     private void UpdateHealth()
     {
         pHealth.text = player.characterName + "'s Health: " + player.health;
-        pStamina.text = player.characterName + "'s Stamina: " + player.stamina;
 
         for (int i = 0; i < gameManager.enemies.Count; i++)
         {
@@ -127,7 +167,7 @@ public class BattleManager : MonoBehaviour {
         }
     }
 
-    private void UpdateActions()
+    private void UpdateCombo()
     {
         for (int i = 0; i < actionButtons.Count; i++) 
         {
@@ -135,37 +175,30 @@ public class BattleManager : MonoBehaviour {
         }
     }
 
-    private void UpdateSpecials()
+    private void UpdateSkills()
     {
-        for (int i = 0; i < specialButtons.Count; i++)
+        for (int i = 0; i < skillButtons.Count; i++)
         {
-            specialButtons[i].interactable = player.GetAction(i).Cost <= player.stamina;
+            skillButtons[i].interactable = player.GetSkill(i).Cost <= player.stamina;
         }
+
+        player.activeSkill = null;
     }
 
     private IEnumerator BattleSequence()
     {
-        while (true){
+        while (true) {
             if (turnOrder.Count > 0)
             {
                 CharacterInfo activeCharacter = turnOrder.Peek();
 
                 if (activeCharacter == player){
                     awaitCommand = true;
-                    actionContainer.SetActive(true);
-                    while (awaitCommand)
-                    {
-                        
-                        yield return null;
-                    }
-                    
-                    actionContainer.SetActive(false);
-                    
-                    if (player.stamina > 0)
-                    {
-                        awaitCommand = true;
-                        specialContainer.SetActive(true);
-                    }
+                    pickAction.SetActive(true);
+
+                    if (player.stamina <= 0) pickSkillButton.interactable = false;
+
+                    else pickSkillButton.interactable = true;
 
                     while (awaitCommand)
                     {
@@ -173,8 +206,9 @@ public class BattleManager : MonoBehaviour {
                         yield return null;
                     }
                     awaitCommand = true;
-                    specialContainer.SetActive(false);
-                    targetContainer.SetActive(true);
+                    
+                    actionContainer.SetActive(true);
+                    
                     while (awaitCommand)
                     {
 
@@ -182,37 +216,41 @@ public class BattleManager : MonoBehaviour {
                         yield return null;
                     }
 
-                    targetContainer.SetActive(false);
+                    actionContainer.SetActive(false);
 
-                    foreach (CharacterAction a in actions)
+                    foreach (ComboAction a in comboActions)
                     {
                         Debug.Log($"{activeCharacter.characterName} used {a.Name} at {target.characterName}");
                         activeCharacter.DoAction(a, target);
+                        UpdateHealth();
+
+                        if (target.health <= 0)
+                        {
+                            killCount++;
+
+                            if (killCount >= gameManager.enemies.Count) EndBattle();
+
+                            int targetIndex = gameManager.enemies.IndexOf(target as EnemyInfo);
+                            
+                            targetContainer.transform.GetChild(targetIndex).GetComponent<Button>().interactable = false;
+
+                            var newTurnOrder = new Queue<CharacterInfo>(turnOrder.Where(x => x != target));
+                            turnOrder = newTurnOrder;
+                            
+                            break;
+                        }
+
+                        yield return new WaitForSeconds(.5f);
                     }
 
-                    Debug.Log($"{activeCharacter.characterName} used {specialAction.Name} at {target.characterName}");
-                    activeCharacter.DoSpecialAction(specialAction, target);
-
-                    if (target.health <= 0)
-                    {
-                        killCount++;
-
-                        if (killCount >= gameManager.enemies.Count) EndBattle();
-
-                        int targetIndex = gameManager.enemies.IndexOf(target as EnemyInfo);
-                        
-                        targetContainer.transform.GetChild(targetIndex).GetComponent<Button>().interactable = false;
-
-                        var newTurnOrder = new Queue<CharacterInfo>(turnOrder.Where(x => x != target));
-                        turnOrder = newTurnOrder;
-                        
-                    }
+                    player.activeSkill = null;
 
                 } else {
-                    actions.Add(activeCharacter.GetAction(0));
+                    comboActions.Add(activeCharacter.GetAction(0));
 
-                    Debug.Log($"{activeCharacter.characterName} used {actions[0].Name} at {player.characterName}"); // Display the action's name
-                    activeCharacter.DoAction(actions[0], player);
+                    Debug.Log($"{activeCharacter.characterName} used {comboActions[0].Name} at {player.characterName}"); // Display the action's name
+                    activeCharacter.DoAction(comboActions[0], player);
+                    UpdateHealth();
 
                     if (player.health <= 0) EndBattle();
                 }
@@ -230,14 +268,12 @@ public class BattleManager : MonoBehaviour {
 
     private void NextTurn(CharacterInfo activeCharacter)
     {
-        UpdateHealth();
-        UpdateSpecials();
-        UpdateActions();
+        UpdateSkills();
 
         turnOrder.Dequeue();
         turnOrder.Enqueue(activeCharacter);
 
-        actions.Clear();
+        comboActions.Clear();
         comboLength = 0;
     }
 
